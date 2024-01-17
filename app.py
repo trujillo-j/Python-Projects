@@ -1,9 +1,12 @@
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy 
+import shortuuid 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///urls.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+shortuuid.set_alphabet("abcfghjkmnprtubxyz1347095")
 
 db = SQLAlchemy(app)
 
@@ -12,9 +15,12 @@ class urls(db.Model):
     longURL = db.Column("longURL", db.String())
     shortURL = db.Column("shortURL", db.String(3))
 
-    def __init__(self, long, short):
+    def __init__(self, long, short = None):
         self.longURL = long
-        self.shortURL = short 
+        if short is None:
+            self.shortURL = shortuuid.uuid()[:4]
+        else:
+            self.shortURL = short 
 
 
 with app.app_context():
@@ -24,11 +30,19 @@ with app.app_context():
 def home():
     if request.method == "POST":
         url_recieved = request.form["subURL"]
-        return url_recieved
+        submitted_urls = urls.query.filter_by(longURL = url_recieved).first() 
+        if submitted_urls:
+            return submitted_urls.shortURL
+        new_url = url_recieved
+        db.session.add(urls(long = new_url))
+        db.session.commit()
+
+        return urls.query.filter_by(longURL = new_url).first().shortURL
+
     else:
         return render_template("home.html")
 
-@app.route('/trujilloj')
+@app.route('/trujilloj') #unused directory, will remove later
 def trujillo():
     return "Mr. Trujillo, hi!"
 
