@@ -36,8 +36,9 @@ def home():
         new_url = url_recieved
         db.session.add(urls(long = new_url))
         db.session.commit()
+        urlEnd = urls.query.filter_by(longURL = new_url).first().shortURL
 
-        return urls.query.filter_by(longURL = new_url).first().shortURL
+        return render_template("short.html", shortEnd = urlEnd)
 
     else:
         return render_template("home.html")
@@ -45,6 +46,10 @@ def home():
 @app.route('/trujilloj') #unused directory, will remove later
 def trujillo():
     return "Mr. Trujillo, hi!"
+
+@app.route('/display/<url>') #incomplete directory, need to complete html page and short_url_display function 
+def display_shortURL(url):
+    return render_template('short.html', short_url_display = url)
 
 if __name__ =='__main__':
     app.run(port=5000, debug=True)
