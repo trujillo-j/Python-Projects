@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy 
 import shortuuid 
 
@@ -32,7 +32,8 @@ def home():
         url_recieved = request.form["subURL"]
         submitted_urls = urls.query.filter_by(longURL = url_recieved).first() 
         if submitted_urls:
-            return submitted_urls.shortURL
+            foundEnd = urls.query.filter_by(longURL = url_recieved).first().shortURL
+            return render_template("short.html", shortEnd = foundEnd)
         new_url = url_recieved
         db.session.add(urls(long = new_url))
         db.session.commit()
@@ -44,12 +45,20 @@ def home():
         return render_template("home.html")
 
 @app.route('/trujilloj') #unused directory, will remove later
-def trujillo():
-    return "Mr. Trujillo, hi!"
+def trujilloj():
+    return redirect("https://github.com/trujillo-j/URL-Shortner")
 
 @app.route('/display/<url>') #incomplete directory, need to complete html page and short_url_display function 
 def display_shortURL(url):
     return render_template('short.html', short_url_display = url)
 
+@app.route('/<short_URL>')
+def redirection(short_URL):
+    longURL = urls.query.filter_by(shortURL = short_URL).first().longURL
+    if longURL:
+            return redirect(longURL)
+    else:
+        return f'<h1>URL does not exist.</h1>'
+
 if __name__ =='__main__':
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=True) 
