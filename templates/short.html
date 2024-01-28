@@ -7,7 +7,16 @@
         <h1>Jonathan's URL Shortner</h1>
         <br>
         <div>
-            <p> shortned URL:  'localhost/'{{shortEnd}} </p>
+            <p> shortned URL:  http://127.0.0.1:5000/{{shortEnd}} </p>
+            <button class="btn btn-primary" onClick="copyToClipboard('http://127.0.0.1:5000/{{shortEnd}}')">Copy link</button>
+
+            {% block scripts %}
+            <script>
+                function copyToClipboard(link)  {
+                    navigator.clipboard.writeText(link)
+                }
+            </script>
+            {% endblock %}
 
         </div>
 
