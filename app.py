@@ -33,13 +33,13 @@ def home():
         submitted_urls = urls.query.filter_by(longURL = url_recieved).first() 
         if submitted_urls:
             foundEnd = urls.query.filter_by(longURL = url_recieved).first().shortURL
-            return render_template("short.html", shortEnd = foundEnd)
+            return display_shortURL(foundEnd)
         new_url = url_recieved
         db.session.add(urls(long = new_url))
         db.session.commit()
         urlEnd = urls.query.filter_by(longURL = new_url).first().shortURL
 
-        return render_template("short.html", shortEnd = urlEnd)
+        return display_shortURL(urlEnd)
 
     else:
         return render_template("home.html")
@@ -48,17 +48,21 @@ def home():
 def trujilloj():
     return redirect("https://github.com/trujillo-j/URL-Shortner")
 
-@app.route('/display/<url>') #incomplete directory, need to complete html page and short_url_display function 
+@app.route('/display/<url>')
 def display_shortURL(url):
-    return render_template('short.html', short_url_display = url)
+    return render_template('short.html', shortEnd = url)
 
 @app.route('/<short_URL>')
 def redirection(short_URL):
-    longURL = urls.query.filter_by(shortURL = short_URL).first().longURL
+    longURL = urls.query.filter_by(shortURL = short_URL).first()
     if longURL:
-            return redirect(longURL)
+            return redirect(longURL.longURL)
     else:
         return f'<h1>URL does not exist.</h1>'
+
+@app.route('/all_urls')
+def display_all():
+    return render_template('all_urls.html', vals=urls.query.all())
 
 if __name__ =='__main__':
     app.run(port=5000, debug=True) 
